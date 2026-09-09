@@ -103,6 +103,11 @@ function formatAmount(amt){
     return String(amt.wei);
   }
 }
+function extractGold(r){
+  if(r && r.gold && isAmount(r.gold.balance)) return r.gold.balance;
+  if(r && r.live && isAmount(r.live.gold)) return r.live.gold;
+  return findAmount(r, 'gold');
+}
 function findAmount(obj, keyword, depth=0){
   if(!obj || typeof obj !== 'object' || depth > 4) return null;
   for(const [k,v] of Object.entries(obj)) if(isAmount(v) && k.toLowerCase().includes(keyword)) return v;
@@ -216,7 +221,7 @@ $('loadBtn').addEventListener('click', async () => {
         const batch = await apiGet(proxy, '/v1/riggles/batch?ids=' + chunk.join(','), key);
         const batchItems = batch.items || batch.riggles || [];
         if(i === 0) sampleBatchRaw = JSON.stringify(batchItems[0] || batch, null, 2);
-        batchItems.forEach(r => { const rid = extractId(r); if(rid) goldById[rid] = findAmount(r,'gold'); });
+        batchItems.forEach(r => { const rid = extractId(r); if(rid) goldById[rid] = extractGold(r); });
       } catch(e) {}
     }
 
