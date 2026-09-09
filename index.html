@@ -3,503 +3,1605 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
 <title>Riggles — Listed with $GLD in Wallet</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+  rel="stylesheet"
+>
+
 <style>
-  :root {
-    --bg: #0b0b0a; --panel: #141412; --line: #262420; --line-soft: #1c1a17;
-    --text: #ece7db; --text-dim: #8c8577; --gold: #d7ad4b; --gold-dim: #7a6530;
-    --blue: #6fb7c9; --red: #c9705f; --radius: 4px;
+
+:root{
+  --bg:#0b0b0a;
+  --panel:#141412;
+  --line:#262420;
+  --line-soft:#1c1a17;
+  --text:#ece7db;
+  --text-dim:#8c8577;
+  --gold:#d7ad4b;
+  --gold-dim:#7a6530;
+  --blue:#6fb7c9;
+  --red:#c9705f;
+  --green:#8fbf7a;
+  --radius:4px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(
+      ellipse 900px 500px at 15% -10%,
+      rgba(215,173,75,0.07),
+      transparent 60%
+    ),
+    var(--bg);
+
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+
+.wrap{
+  max-width:950px;
+  margin:0 auto;
+  padding:48px 24px 100px;
+}
+
+header{
+  border-bottom:1px solid var(--line);
+  padding-bottom:20px;
+  margin-bottom:24px;
+}
+
+header h1{
+  font-size:22px;
+  margin:0 0 6px;
+}
+
+header h1 span{
+  color:var(--gold);
+}
+
+header .sub{
+  color:var(--text-dim);
+  font-size:13px;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+input,
+select{
+  background:#0e0d0b;
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:var(--radius);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  outline:none;
+}
+
+input{
+  flex:1;
+  min-width:220px;
+}
+
+input:focus,
+select:focus{
+  border-color:var(--gold-dim);
+}
+
+button{
+  background:var(--gold);
+  color:#131009;
+  border:none;
+  padding:10px 18px;
+  border-radius:var(--radius);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#e6bc5c;
+}
+
+button:disabled{
+  background:#3a3527;
+  color:#7a745f;
+  cursor:not-allowed;
+}
+
+.controls{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:16px;
+  padding-bottom:14px;
+
+  border-bottom:1px solid var(--line-soft);
+}
+
+.filter-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:var(--text-dim);
+}
+
+.filter-item input{
+  min-width:auto;
+  flex:none;
+  accent-color:var(--gold);
+  cursor:pointer;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+thead th{
+  text-align:left;
+  font-weight:500;
+  color:var(--text-dim);
+  font-size:11px;
+
+  padding:10px;
+
+  border-bottom:1px solid var(--line);
+
+  white-space:nowrap;
+  text-transform:uppercase;
+}
+
+tbody td{
+  padding:10px;
+
+  border-bottom:1px solid var(--line-soft);
+
+  font-family:'JetBrains Mono',monospace;
+}
+
+tbody tr:hover{
+  background:#17150f;
+}
+
+td.gold{
+  color:var(--gold);
+  font-weight:700;
+}
+
+td.price{
+  color:var(--blue);
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+.count{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-bottom:12px;
+}
+
+.msg{
+  font-size:13px;
+  padding:12px 14px;
+  border-radius:var(--radius);
+  margin-top:6px;
+}
+
+.msg.error{
+  background:rgba(201,112,95,0.1);
+  border:1px solid rgba(201,112,95,0.35);
+  color:#e3a196;
+}
+
+.msg.info{
+  background:rgba(111,183,201,0.08);
+  border:1px solid rgba(111,183,201,0.3);
+  color:var(--blue);
+}
+
+.msg.success{
+  background:rgba(143,191,122,0.08);
+  border:1px solid rgba(143,191,122,0.28);
+  color:var(--green);
+}
+
+.msg pre{
+  white-space:pre-wrap;
+  word-break:break-word;
+  font-size:12px;
+  margin:8px 0 0;
+  color:#d8a598;
+}
+
+.spinner{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+
+  border:2px solid rgba(255,255,255,0.15);
+  border-top-color:var(--gold);
+
+  display:inline-block;
+  vertical-align:-2px;
+
+  margin-right:6px;
+
+  animation:spin .7s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: radial-gradient(ellipse 900px 500px at 15% -10%, rgba(215,173,75,0.07), transparent 60%), var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    line-height: 1.5;
-  }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  a { color: var(--blue); text-decoration: none; }
-  a:hover { color: #9ed4e3; text-decoration: underline; }
-  .wrap { max-width: 950px; margin: 0 auto; padding: 48px 24px 100px; }
-  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 24px; }
-  header h1 { font-size: 22px; margin: 0 0 6px; }
-  header h1 span { color: var(--gold); }
-  header .sub { color: var(--text-dim); font-size: 13px; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  input[type=text], input[type=password] {
-    background: #0e0d0b; border: 1px solid var(--line); color: var(--text); padding: 10px 12px;
-    border-radius: var(--radius); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; flex: 1; min-width: 220px;
-  }
-  input:focus, select:focus { border-color: var(--gold-dim); }
-  select {
-    background: #0e0d0b; border: 1px solid var(--line); color: var(--text); padding: 10px 12px;
-    border-radius: var(--radius); font-family: 'Space Grotesk', sans-serif; font-size: 13px; outline: none;
-  }
-  button {
-    background: var(--gold); color: #131009; border: none; padding: 10px 18px; border-radius: var(--radius);
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer;
-  }
-  button:hover { background: #e6bc5c; }
-  button:disabled { background: #3a3527; color: #7a745f; cursor: not-allowed; }
-  .controls {
-    display: flex; gap: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between;
-    margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line-soft);
-  }
-  .filter-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
-  .filter-item input[type=checkbox] { accent-color: var(--gold); cursor: pointer; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th {
-    text-align: left; font-weight: 500; color: var(--text-dim); font-size: 11px; padding: 10px;
-    border-bottom: 1px solid var(--line); white-space: nowrap; text-transform: uppercase;
-  }
-  tbody td { padding: 10px; border-bottom: 1px solid var(--line-soft); font-family: 'JetBrains Mono', monospace; }
-  tbody tr:hover { background: #17150f; }
-  td.gold { color: var(--gold); font-weight: 700; }
-  td.price { color: var(--blue); }
-  .table-wrap { overflow-x: auto; }
-  .count { font-size: 12px; color: var(--text-dim); margin-bottom: 12px; }
-  .msg { font-size: 13px; padding: 12px 14px; border-radius: var(--radius); margin-top: 6px; }
-  .msg.error { background: rgba(201,112,95,0.1); border: 1px solid rgba(201,112,95,0.35); color: #e3a196; }
-  .msg.info { background: rgba(111,183,201,0.08); border: 1px solid rgba(111,183,201,0.3); color: var(--blue); }
-  .msg pre { white-space: pre-wrap; font-size: 12px; margin: 8px 0 0; color: #d8a598; max-height: 250px; overflow-y: auto; }
-  .spinner {
-    width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15);
-    border-top-color: var(--gold); display: inline-block; vertical-align: -2px; margin-right: 6px;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  footer { margin-top: 32px; font-size: 12px; color: var(--text-dim); border-top: 1px solid var(--line); padding-top: 16px; }
+}
+
+footer{
+  margin-top:32px;
+  font-size:12px;
+  color:var(--text-dim);
+
+  border-top:1px solid var(--line);
+  padding-top:16px;
+}
+
 </style>
 </head>
+
+
 <body>
+
 <div class="wrap">
-  <header>
-    <h1>Riggles — Listed with <span>$GLD in Wallet</span></h1>
-    <div class="sub">Tracks active OpenSea listings alongside strictly wallet-held $GLD (excluding claimed & earned).</div>
-  </header>
 
-  <div class="panel">
-    <div class="row" style="margin-bottom:10px;">
-      <input type="text" id="proxyUrl" placeholder="Your worker URL, e.g. https://riggles-proxy.yoursubdomain.workers.dev" autocomplete="off" />
-    </div>
-    <div class="row">
-      <input type="password" id="apiKey" placeholder="Paste your Bearer API key…" autocomplete="off" />
-      <button id="loadBtn">Load listings</button>
-    </div>
-  </div>
+<header>
 
-  <div class="panel">
-    <div class="controls" id="filterBar" style="display:none;">
-      <div class="filter-item">
-        <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:var(--text);">
-          <input type="checkbox" id="onlyGldFilter" checked /> Only show Riggles holding $GLD (&gt; 0)
-        </label>
-      </div>
-      <div class="row" style="gap:12px;">
-        <input type="text" id="searchBox" placeholder="Search Riggle ID..." style="width:160px; min-width:auto; padding:6px 10px; font-size:12px;" />
-        <select id="sortSelect" style="padding:6px 10px; font-size:12px;">
-          <option value="gold-desc">$GLD Held: High to Low</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="id-asc">Riggle ID: Low to High</option>
-        </select>
-      </div>
-    </div>
+<h1>
+Riggles — Listed with
+<span>$GLD in Wallet</span>
+</h1>
 
-    <div id="area"><div class="msg info">Paste your Worker URL and Bearer API key above and click "Load listings."</div></div>
-  </div>
-
-  <footer>
-    Direct OpenSea item route via contract <code>0x49a4db49c460d5e06ee0b69c5ce0b9744522a3a8</code>.
-  </footer>
+<div class="sub">
+Active OpenSea listings with the live $GLD currently held in each Riggle's wallet.
 </div>
 
+</header>
+
+
+<div class="panel">
+
+<div class="row" style="margin-bottom:10px;">
+
+<input
+  type="text"
+  id="proxyUrl"
+  placeholder="https://your-worker.workers.dev"
+  autocomplete="off"
+/>
+
+</div>
+
+
+<div class="row">
+
+<input
+  type="password"
+  id="apiKey"
+  placeholder="Paste your Bearer API key…"
+  autocomplete="off"
+/>
+
+<button id="loadBtn">
+Load listings
+</button>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div
+  class="controls"
+  id="filterBar"
+  style="display:none;"
+>
+
+<div class="filter-item">
+
+<label
+  style="
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text);
+  "
+>
+
+<input
+  type="checkbox"
+  id="onlyGldFilter"
+  checked
+/>
+
+Only show Riggles holding $GLD
+
+</label>
+
+</div>
+
+
+<div class="row" style="gap:12px;">
+
+<input
+  type="text"
+  id="searchBox"
+  placeholder="Search Riggle ID..."
+  style="
+    width:160px;
+    min-width:auto;
+    padding:6px 10px;
+    font-size:12px;
+  "
+/>
+
+
+<select
+  id="sortSelect"
+  style="
+    padding:6px 10px;
+    font-size:12px;
+  "
+>
+
+<option value="gold-desc">
+$GLD Held: High to Low
+</option>
+
+<option value="price-asc">
+Price: Low to High
+</option>
+
+<option value="price-desc">
+Price: High to Low
+</option>
+
+<option value="id-asc">
+Riggle ID: Low to High
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div id="area">
+
+<div class="msg info">
+Paste your Worker URL and Bearer API key above and click "Load listings."
+</div>
+
+</div>
+
+</div>
+
+
+<footer>
+
+Uses Riggles live-chain data for the wallet-held GLD and OpenSea data for listings.
+
+</footer>
+
+</div>
+
+
 <script>
-const $ = id => document.getElementById(id);
 
-let allFetchedRows = [];
+const $ = id =>
+  document.getElementById(id);
+
+
+let allRows = [];
+
+
 let savedProxy = null;
-try { savedProxy = localStorage.getItem('riggles_proxy_url'); } catch(e) {}
-if (savedProxy) $('proxyUrl').value = savedProxy;
 
-function fallbackLink(id) {
-  return 'https://opensea.io/item/robinhood/0x49a4db49c460d5e06ee0b69c5ce0b9744522a3a8/' + id;
+try{
+
+  savedProxy =
+    localStorage.getItem(
+      "riggles_proxy_url"
+    );
+
+}catch(e){}
+
+
+if(savedProxy){
+
+  $("proxyUrl").value =
+    savedProxy;
+
 }
 
-// Universal parser for decimals, wei, and display strings
-function normalizeAmount(v) {
-  if (v === null || v === undefined) return null;
 
-  if (typeof v === 'number') {
-    return v;
-  }
+// ============================================================
+// API
+// ============================================================
 
-  if (typeof v === 'object') {
-    if (v.display !== undefined) {
-      const parsed = parseFloat(v.display);
-      return !isNaN(parsed) ? parsed : v.display;
-    }
-    if (v.amount !== undefined) return normalizeAmount(v.amount);
-    if (v.value !== undefined) return normalizeAmount(v.value);
-    if (v.balance !== undefined) return normalizeAmount(v.balance);
-    if ('wei' in v) {
-      try {
-        const wei = BigInt(v.wei);
-        const decimals = v.decimals ?? 18;
-        const divisor = BigInt(10) ** BigInt(decimals);
-        const whole = wei / divisor;
-        const frac = wei % divisor;
-        let fracStr = frac.toString().padStart(decimals, '0').slice(0, 4).replace(/0+$/, '');
-        return parseFloat(`${whole}.${fracStr || '0'}`);
-      } catch(e) {
-        return parseFloat(v.wei) || null;
-      }
-    }
-  }
+async function apiGet(
+  base,
+  path,
+  key
+){
 
-  if (typeof v === 'string') {
-    const s = v.trim();
-    if (!s || /^0x[a-fA-F0-9]{40}$/.test(s)) return null; // Reject ETH addresses
-    if (/^\d+$/.test(s) && s.length > 15) {
-      try {
-        const wei = BigInt(s);
-        const divisor = BigInt(10) ** BigInt(18);
-        const whole = wei / divisor;
-        const frac = wei % divisor;
-        let fracStr = frac.toString().padStart(18, '0').slice(0, 4).replace(/0+$/, '');
-        return parseFloat(`${whole}.${fracStr || '0'}`);
-      } catch(e) {
-        return parseFloat(s) || null;
-      }
-    }
-    const num = parseFloat(s);
-    return !isNaN(num) ? num : s;
-  }
-  return null;
-}
+  let response;
 
-// STRICTLY targets "$GLD IN THE WALLET" and excludes earned / claimed
-function extractWalletGld(r) {
-  if (!r || typeof r !== 'object') return null;
+  try{
 
-  // 1. Inspect attributes / traits array
-  const attrs = r.attributes || r.traits || r.properties;
-  if (Array.isArray(attrs)) {
-    for (const a of attrs) {
-      const name = String(a.trait_type || a.name || a.key || '').trim().toLowerCase();
-      // Must be wallet/held, MUST NOT be claimed or earned
-      if ((name.includes('wallet') || name.includes('held') || name.includes('hold')) &&
-          !name.includes('earn') && !name.includes('claim')) {
-        const val = normalizeAmount(a.value ?? a.display_value);
-        if (val !== null) return val;
-      }
-    }
+    response =
+      await fetch(
+        base + path,
+        {
+          headers:{
+            "Authorization":
+              "Bearer " + key
+          }
+        }
+      );
+
+  }catch(error){
+
+    throw new Error(
+      "Could not reach your Worker. Check the Worker URL."
+    );
+
   }
 
-  // 2. Inspect traits object map
-  if (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) {
-    for (const [k, v] of Object.entries(attrs)) {
-      const lk = k.toLowerCase();
-      if ((lk.includes('wallet') || lk.includes('held') || lk.includes('hold')) &&
-          !lk.includes('earn') && !lk.includes('claim')) {
-        const val = normalizeAmount(v);
-        if (val !== null) return val;
-      }
-    }
-  }
 
-  // 3. Inspect dedicated gold object
-  if (r.gold && typeof r.gold === 'object') {
-    const g = r.gold;
-    const walletKeys = ['in_the_wallet', 'in_wallet', 'inWallet', 'wallet', 'held', 'wallet_balance'];
-    for (const k of walletKeys) {
-      if (g[k] !== undefined) {
-        const val = normalizeAmount(g[k]);
-        if (val !== null) return val;
-      }
-    }
-  }
-
-  // 4. Inspect direct top-level keys
-  for (const [k, v] of Object.entries(r)) {
-    const lk = k.toLowerCase();
-    if ((lk.includes('wallet') || lk.includes('held')) &&
-        (lk.includes('gold') || lk.includes('gld') || lk === 'wallet') &&
-        !lk.includes('earn') && !lk.includes('claim')) {
-      const val = normalizeAmount(v);
-      if (val !== null) return val;
-    }
-  }
-
-  // 5. Deep search fallback
-  return deepFindWalletGold(r);
-}
-
-function deepFindWalletGold(obj, depth = 0) {
-  if (!obj || typeof obj !== 'object' || depth > 4) return null;
-  for (const [k, v] of Object.entries(obj)) {
-    const lk = k.toLowerCase();
-    if ((lk.includes('wallet') || lk.includes('held')) &&
-        !lk.includes('earn') && !lk.includes('claim') && !lk.includes('url') && !lk.includes('addr')) {
-      const val = normalizeAmount(v);
-      if (val !== null && typeof val === 'number') return val;
-    }
-  }
-  for (const [k, v] of Object.entries(obj)) {
-    const lk = k.toLowerCase();
-    if (v && typeof v === 'object' && !Array.isArray(v) && !lk.includes('earn') && !lk.includes('claim')) {
-      const f = deepFindWalletGold(v, depth + 1);
-      if (f !== null) return f;
-    }
-  }
-  return null;
-}
-
-function extractPrice(obj, depth = 0) {
-  if (!obj || typeof obj !== 'object' || depth > 4) return null;
-  for (const [k, v] of Object.entries(obj)) {
-    const lk = k.toLowerCase();
-    if (lk.includes('price')) {
-      const amt = normalizeAmount(v);
-      if (amt !== null) return typeof amt === 'number' ? amt.toFixed(4) + ' ETH' : String(amt);
-    }
-  }
-  for (const [k, v] of Object.entries(obj)) {
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      const p = extractPrice(v, depth + 1);
-      if (p !== null) return p;
-    }
-  }
-  return null;
-}
-
-function extractId(obj, depth = 0) {
-  if (!obj || typeof obj !== 'object' || depth > 4) return null;
-  for (const [k, v] of Object.entries(obj)) {
-    const clean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (clean.includes('tokenid') || clean.includes('riggleid')) {
-      const n = parseInt(v, 10);
-      if (!isNaN(n) && n > 0 && n < 10000) return String(n);
-    }
-  }
-  for (const [k, v] of Object.entries(obj)) {
-    if (k.toLowerCase() === 'id') {
-      const n = parseInt(v, 10);
-      if (!isNaN(n) && n > 0 && n < 10000 && String(v).trim() === String(n)) return String(n);
-    }
-  }
-  for (const [k, v] of Object.entries(obj)) {
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      const found = extractId(v, depth + 1);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-async function apiGet(base, path, key) {
-  let res;
-  try {
-    res = await fetch(base + path, { headers: { 'Authorization': 'Bearer ' + key } });
-  } catch(networkErr) {
-    const e = new Error("Request failed to reach Worker proxy. Check URL and connectivity.");
-    e.raw = String(networkErr);
-    throw e;
-  }
   let body = null;
-  try { body = await res.json(); } catch(e) {}
-  if (!res.ok) {
-    throw new Error((body && body.error && body.error.message) ? body.error.message : 'API returned status ' + res.status);
+
+  try{
+
+    body =
+      await response.json();
+
+  }catch(e){}
+
+
+  if(!response.ok){
+
+    const message =
+      body &&
+      body.error &&
+      body.error.message
+
+        ? body.error.message
+
+        : "API request failed (" +
+          response.status +
+          ")";
+
+
+    throw new Error(message);
   }
+
+
   return body;
 }
 
-function ingestRigglesData(data, store) {
-  if (!data) return;
-  let list = [];
-  if (Array.isArray(data)) list = data;
-  else if (typeof data === 'object') {
-    list = data.items || data.riggles || data.data || [];
-    if (!list.length) {
-      for (const [k, v] of Object.entries(data)) {
-        if (v && typeof v === 'object') {
-          const id = extractId(v) || (!isNaN(parseInt(k, 10)) ? k.trim() : null);
-          if (id) {
-            const g = extractWalletGld(v);
-            if (g !== null) store[id] = g;
+
+// ============================================================
+// Amount parser
+// ============================================================
+
+function amountToNumber(value){
+
+  if(
+    value === null ||
+    value === undefined
+  ){
+    return null;
+  }
+
+
+  if(
+    typeof value === "number"
+  ){
+
+    return value;
+  }
+
+
+  if(
+    typeof value === "string"
+  ){
+
+    const n =
+      Number(value);
+
+    return Number.isFinite(n)
+      ? n
+      : null;
+  }
+
+
+  if(
+    typeof value !== "object"
+  ){
+
+    return null;
+  }
+
+
+  // IMPORTANT:
+  // Riggles API Amount is {wei, display}
+  if(
+    value.display !== undefined
+  ){
+
+    const n =
+      Number(value.display);
+
+    if(
+      Number.isFinite(n)
+    ){
+
+      return n;
+    }
+  }
+
+
+  if(
+    value.wei !== undefined
+  ){
+
+    try{
+
+      const wei =
+        BigInt(value.wei);
+
+
+      const decimals =
+        Number(
+          value.decimals ??
+          18
+        );
+
+
+      const divisor =
+        10n ** BigInt(decimals);
+
+
+      const whole =
+        wei / divisor;
+
+
+      const fraction =
+        wei % divisor;
+
+
+      const fractionText =
+        fraction
+          .toString()
+          .padStart(
+            decimals,
+            "0"
+          )
+          .slice(
+            0,
+            8
+          );
+
+
+      return Number(
+        whole.toString() +
+        "." +
+        fractionText
+      );
+
+    }catch(e){}
+
+  }
+
+
+  return null;
+}
+
+
+// ============================================================
+// Find token ID
+// ============================================================
+
+function extractId(
+  obj,
+  depth = 0
+){
+
+  if(
+    !obj ||
+    typeof obj !== "object" ||
+    depth > 6
+  ){
+
+    return null;
+  }
+
+
+  for(
+    const [key,value]
+    of Object.entries(obj)
+  ){
+
+    const k =
+      key
+        .toLowerCase()
+        .replace(
+          /[^a-z0-9]/g,
+          ""
+        );
+
+
+    if(
+      k === "tokenid" ||
+      k === "riggleid"
+    ){
+
+      const n =
+        Number(value);
+
+
+      if(
+        Number.isInteger(n) &&
+        n > 0 &&
+        n <= 2222
+      ){
+
+        return String(n);
+      }
+
+    }
+
+  }
+
+
+  for(
+    const [key,value]
+    of Object.entries(obj)
+  ){
+
+    if(
+      key.toLowerCase() === "id"
+    ){
+
+      const n =
+        Number(value);
+
+
+      if(
+        Number.isInteger(n) &&
+        n > 0 &&
+        n <= 2222
+      ){
+
+        return String(n);
+      }
+
+    }
+
+  }
+
+
+  for(
+    const value
+    of Object.values(obj)
+  ){
+
+    if(
+      value &&
+      typeof value === "object"
+    ){
+
+      const id =
+        extractId(
+          value,
+          depth + 1
+        );
+
+
+      if(id){
+
+        return id;
+      }
+
+    }
+
+  }
+
+
+  return null;
+}
+
+
+// ============================================================
+// THIS IS THE IMPORTANT PART
+//
+// Riggles API documentation says:
+// `live` = current on-chain state
+// and specifically includes GLD currently sitting
+// inside the Riggle wallet.
+//
+// We ONLY read live.gold here.
+// ============================================================
+
+function extractWalletGld(
+  riggle
+){
+
+  if(
+    !riggle ||
+    typeof riggle !== "object"
+  ){
+
+    return null;
+  }
+
+
+  // Expected live-chain shape
+  if(
+    riggle.live &&
+    typeof riggle.live === "object"
+  ){
+
+    const live =
+      riggle.live;
+
+
+    // Most likely exact field
+    if(
+      live.gold !== undefined
+    ){
+
+      const value =
+        amountToNumber(
+          live.gold
+        );
+
+
+      if(
+        value !== null
+      ){
+
+        return value;
+      }
+
+    }
+
+
+    // In case API labels it walletGold
+    const walletFields = [
+      "walletGold",
+      "goldInWallet",
+      "gldInWallet",
+      "walletGld",
+      "gold"
+    ];
+
+
+    for(
+      const field
+      of walletFields
+    ){
+
+      if(
+        live[field] !== undefined
+      ){
+
+        const value =
+          amountToNumber(
+            live[field]
+          );
+
+
+        if(
+          value !== null
+        ){
+
+          return value;
+        }
+
+      }
+
+    }
+
+  }
+
+
+  // Some API responses may put live data
+  // under another nested object.
+  if(
+    riggle.liveChain &&
+    typeof riggle.liveChain === "object"
+  ){
+
+    const value =
+      extractWalletGld(
+        {
+          live:
+            riggle.liveChain
+        }
+      );
+
+
+    if(
+      value !== null
+    ){
+
+      return value;
+    }
+
+  }
+
+
+  return null;
+}
+
+
+// ============================================================
+// Listing price
+// ============================================================
+
+function extractListingPrice(
+  listing
+){
+
+  if(
+    !listing ||
+    !listing.price
+  ){
+
+    return null;
+  }
+
+
+  const price =
+    listing.price;
+
+
+  const value =
+    amountToNumber(
+      price
+    );
+
+
+  if(
+    value === null
+  ){
+
+    return null;
+  }
+
+
+  const currency =
+    price.currency ||
+    "ETH";
+
+
+  return {
+    value,
+    display:
+      value.toFixed(4) +
+      " " +
+      currency
+  };
+
+}
+
+
+// ============================================================
+// Correct OpenSea URL
+// ============================================================
+
+function openSeaLink(id){
+
+  return (
+    "https://opensea.io/item/robinhood/" +
+    "0x49a4db49c460d5e06ee0b69c5ce0b9744522a3a8/" +
+    encodeURIComponent(id)
+  );
+
+}
+
+
+// ============================================================
+// Escape HTML
+// ============================================================
+
+function escapeHtml(value){
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+// ============================================================
+// Render
+// ============================================================
+
+function render(){
+
+  const onlyGld =
+    $("onlyGldFilter").checked;
+
+
+  const search =
+    $("searchBox")
+      .value
+      .trim();
+
+
+  const sort =
+    $("sortSelect")
+      .value;
+
+
+  let rows =
+    allRows.filter(
+      row => {
+
+        if(
+          onlyGld &&
+          (
+            row.walletGld === null ||
+            row.walletGld <= 0
+          )
+        ){
+
+          return false;
+        }
+
+
+        if(
+          search &&
+          !row.id.includes(search)
+        ){
+
+          return false;
+        }
+
+
+        return true;
+
+      }
+    );
+
+
+  rows.sort(
+    (a,b) => {
+
+      if(
+        sort === "gold-desc"
+      ){
+
+        return (
+          (b.walletGld || 0) -
+          (a.walletGld || 0)
+        );
+      }
+
+
+      if(
+        sort === "price-asc"
+      ){
+
+        return (
+          (a.priceValue || 0) -
+          (b.priceValue || 0)
+        );
+      }
+
+
+      if(
+        sort === "price-desc"
+      ){
+
+        return (
+          (b.priceValue || 0) -
+          (a.priceValue || 0)
+        );
+      }
+
+
+      return (
+        Number(a.id) -
+        Number(b.id)
+      );
+
+    }
+  );
+
+
+  let html =
+    '<div class="count">' +
+    "Showing " +
+    rows.length +
+    " of " +
+    allRows.length +
+    " listed riggles" +
+    "</div>";
+
+
+  html +=
+    '<div class="table-wrap">' +
+    "<table>" +
+
+    "<thead>" +
+
+    "<tr>" +
+
+    "<th>Riggle</th>" +
+
+    "<th>$GLD in Wallet</th>" +
+
+    "<th>Listing Price</th>" +
+
+    "<th>OpenSea</th>" +
+
+    "</tr>" +
+
+    "</thead>" +
+
+    "<tbody>";
+
+
+  if(!rows.length){
+
+    html +=
+      '<tr>' +
+
+      '<td colspan="4" ' +
+      'style="text-align:center;' +
+      'color:var(--text-dim);' +
+      'padding:24px;">' +
+
+      "No listed Riggles match the filter." +
+
+      "</td>" +
+
+      "</tr>";
+
+  }else{
+
+    for(
+      const row
+      of rows
+    ){
+
+      const gld =
+        row.walletGld === null
+          ? "—"
+          : row.walletGld.toFixed(4);
+
+
+      html +=
+        "<tr>" +
+
+        "<td># " +
+        escapeHtml(row.id) +
+        "</td>" +
+
+
+        '<td class="gold">' +
+        gld +
+        " GLD</td>" +
+
+
+        '<td class="price">' +
+        escapeHtml(
+          row.priceDisplay || "—"
+        ) +
+        "</td>" +
+
+
+        "<td>" +
+
+        '<a href="' +
+        row.link +
+        '" target="_blank" ' +
+        'rel="noopener noreferrer">' +
+
+        "view ↗" +
+
+        "</a>" +
+
+        "</td>" +
+
+        "</tr>";
+
+    }
+
+  }
+
+
+  html +=
+    "</tbody>" +
+    "</table>" +
+    "</div>";
+
+
+  $("area").innerHTML =
+    html;
+
+}
+
+
+// ============================================================
+// Filters
+// ============================================================
+
+$("onlyGldFilter")
+  .addEventListener(
+    "change",
+    render
+  );
+
+
+$("searchBox")
+  .addEventListener(
+    "input",
+    render
+  );
+
+
+$("sortSelect")
+  .addEventListener(
+    "change",
+    render
+  );
+
+
+// ============================================================
+// LOAD
+// ============================================================
+
+$("loadBtn")
+.addEventListener(
+  "click",
+  async () => {
+
+    const key =
+      $("apiKey")
+        .value
+        .trim();
+
+
+    const proxy =
+      $("proxyUrl")
+        .value
+        .trim()
+        .replace(
+          /\/+$/,
+          ""
+        );
+
+
+    if(!proxy){
+
+      $("area").innerHTML =
+        '<div class="msg error">' +
+        "Paste your Worker URL first." +
+        "</div>";
+
+      return;
+    }
+
+
+    if(!key){
+
+      $("area").innerHTML =
+        '<div class="msg error">' +
+        "Paste your API key first." +
+        "</div>";
+
+      return;
+    }
+
+
+    try{
+
+      localStorage.setItem(
+        "riggles_proxy_url",
+        proxy
+      );
+
+    }catch(e){}
+
+
+    $("loadBtn").disabled =
+      true;
+
+
+    $("filterBar").style.display =
+      "none";
+
+
+    $("area").innerHTML =
+      '<div class="msg info">' +
+      '<span class="spinner"></span>' +
+      "Loading OpenSea listings…" +
+      "</div>";
+
+
+    try{
+
+      // ======================================================
+      // 1. GET OPENSEA LISTINGS
+      // ======================================================
+
+      let listings = [];
+
+      let cursor = null;
+
+      let guard = 0;
+
+
+      do{
+
+        const response =
+          await apiGet(
+            proxy,
+
+            "/v1/listings?limit=1000" +
+            (
+              cursor
+                ? "&cursor=" +
+                  encodeURIComponent(cursor)
+                : ""
+            ),
+
+            key
+          );
+
+
+        if(
+          Array.isArray(
+            response.items
+          )
+        ){
+
+          listings.push(
+            ...response.items
+          );
+
+        }
+
+
+        cursor =
+          response.nextCursor ||
+          null;
+
+
+        guard++;
+
+      }while(
+        cursor &&
+        guard < 20
+      );
+
+
+      if(!listings.length){
+
+        $("area").innerHTML =
+          '<div class="msg info">' +
+          "No active listings found." +
+          "</div>";
+
+        return;
+      }
+
+
+      // ======================================================
+      // 2. GET RIGGLE LIVE DATA
+      //
+      // THIS is where the wallet GLD comes from.
+      // ======================================================
+
+      $("area").innerHTML =
+        '<div class="msg info">' +
+        '<span class="spinner"></span>' +
+        "Loading live Riggle wallet balances…" +
+        "</div>";
+
+
+      let riggles = [];
+
+      let riggleCursor = null;
+
+      let riggleGuard = 0;
+
+
+      do{
+
+        const response =
+          await apiGet(
+
+            proxy,
+
+            "/v1/riggles?" +
+            "active=true" +
+            "&listed=true" +
+            "&limit=1000" +
+
+            (
+              riggleCursor
+                ? "&cursor=" +
+                  encodeURIComponent(
+                    riggleCursor
+                  )
+                : ""
+            ),
+
+            key
+
+          );
+
+
+        if(
+          Array.isArray(
+            response.items
+          )
+        ){
+
+          riggles.push(
+            ...response.items
+          );
+
+        }
+
+
+        riggleCursor =
+          response.nextCursor ||
+          null;
+
+
+        riggleGuard++;
+
+      }while(
+        riggleCursor &&
+        riggleGuard < 20
+      );
+
+
+      // ======================================================
+      // 3. Create wallet GLD lookup
+      // ======================================================
+
+      const walletGldById =
+        {};
+
+
+      for(
+        const riggle
+        of riggles
+      ){
+
+        const id =
+          extractId(
+            riggle
+          );
+
+
+        if(!id){
+          continue;
+        }
+
+
+        const gld =
+          extractWalletGld(
+            riggle
+          );
+
+
+        if(
+          gld !== null
+        ){
+
+          walletGldById[id] =
+            gld;
+        }
+
+      }
+
+
+      // ======================================================
+      // 4. Match listing + live Riggle
+      // ======================================================
+
+      allRows =
+        listings.map(
+          listing => {
+
+            const id =
+              extractId(
+                listing
+              );
+
+
+            const price =
+              extractListingPrice(
+                listing
+              );
+
+
+            return {
+
+              id,
+
+              walletGld:
+                id &&
+                walletGldById[id] !== undefined
+
+                  ? walletGldById[id]
+
+                  : null,
+
+              priceValue:
+                price
+                  ? price.value
+                  : null,
+
+              priceDisplay:
+                price
+                  ? price.display
+                  : null,
+
+              link:
+                openSeaLink(id)
+
+            };
+
           }
-        }
-      }
-      return;
+        );
+
+
+      // ======================================================
+      // 5. Show table
+      // ======================================================
+
+      $("filterBar").style.display =
+        "flex";
+
+
+      render();
+
+
+      // ======================================================
+      // DEBUG
+      // ======================================================
+
+      const debug =
+        document.createElement(
+          "details"
+        );
+
+
+      debug.style.marginTop =
+        "16px";
+
+
+      debug.innerHTML =
+        "<summary " +
+        'style="cursor:pointer;' +
+        'color:var(--text-dim);' +
+        'font-size:12px;">' +
+
+        "Debug: live Riggle data" +
+
+        "</summary>" +
+
+
+        '<div class="msg info">' +
+
+        "<strong>First live Riggle:</strong>" +
+
+        "<pre>" +
+
+        escapeHtml(
+          JSON.stringify(
+            riggles[0] || {},
+            null,
+            2
+          )
+        ) +
+
+        "</pre>" +
+
+        "</div>";
+
+
+      $("area")
+        .appendChild(
+          debug
+        );
+
+
+    }catch(error){
+
+      $("area").innerHTML =
+        '<div class="msg error">' +
+
+        escapeHtml(
+          error.message
+        ) +
+
+        "</div>";
+
+    }finally{
+
+      $("loadBtn").disabled =
+        false;
+
     }
+
   }
-  list.forEach(item => {
-    const id = extractId(item);
-    if (id) {
-      const g = extractWalletGld(item);
-      if (g !== null) store[id] = g;
-    }
-  });
-}
+);
 
-function renderTable() {
-  const onlyGld = $('onlyGldFilter').checked;
-  const search = $('searchBox').value.trim();
-  const sortBy = $('sortSelect').value;
-
-  let list = allFetchedRows.filter(r => {
-    if (onlyGld && (!r.goldRaw || r.goldRaw <= 0)) return false;
-    if (search && (!r.id || !r.id.includes(search))) return false;
-    return true;
-  });
-
-  list.sort((a, b) => {
-    if (sortBy === 'gold-desc') return (b.goldRaw || 0) - (a.goldRaw || 0);
-    if (sortBy === 'price-asc') return (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0);
-    if (sortBy === 'price-desc') return (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0);
-    if (sortBy === 'id-asc') return (parseInt(a.id, 10) || 0) - (parseInt(b.id, 10) || 0);
-    return 0;
-  });
-
-  let html = '<div class="count">Showing ' + list.length + ' of ' + allFetchedRows.length + ' listed riggles</div>';
-  html += '<div class="table-wrap"><table><thead><tr>' +
-    '<th>Riggle</th><th>$GLD in Wallet</th><th>Price</th><th>Marketplace</th>' +
-    '</tr></thead><tbody>';
-
-  if (!list.length) {
-    html += '<tr><td colspan="4" style="text-align:center; color:var(--text-dim); padding:24px;">No listed Riggles match the current filters.</td></tr>';
-  } else {
-    for (const r of list) {
-      const displayGold = r.goldRaw !== null ? Number(r.goldRaw).toFixed(4) : '—';
-      html += '<tr>' +
-        '<td>#' + (r.id ?? '—') + '</td>' +
-        '<td class="gold">' + displayGold + '</td>' +
-        '<td class="price">' + (r.price ?? '—') + '</td>' +
-        '<td><a href="' + r.link + '" target="_blank" rel="noopener">view on OpenSea ↗</a></td>' +
-      '</tr>';
-    }
-  }
-  html += '</tbody></table></div>';
-  $('area').innerHTML = html;
-}
-
-$('onlyGldFilter').addEventListener('change', renderTable);
-$('searchBox').addEventListener('input', renderTable);
-$('sortSelect').addEventListener('change', renderTable);
-
-$('loadBtn').addEventListener('click', async () => {
-  const key = $('apiKey').value.trim();
-  const proxy = $('proxyUrl').value.trim().replace(/\/+$/, '');
-  const area = $('area');
-
-  if (!proxy) { area.innerHTML = '<div class="msg error">Paste your Cloudflare Worker URL above.</div>'; return; }
-  if (!key) { area.innerHTML = '<div class="msg error">Paste your API key first.</div>'; return; }
-  try { localStorage.setItem('riggles_proxy_url', proxy); } catch(e) {}
-
-  $('loadBtn').disabled = true;
-  $('filterBar').style.display = 'none';
-  area.innerHTML = '<div class="msg info"><span class="spinner"></span>Fetching active listings…</div>';
-
-  try {
-    let items = [];
-    let cursor = null, guard = 0;
-    do {
-      const resp = await apiGet(proxy, '/v1/listings?limit=1000' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''), key);
-      const batch = resp.items || resp.listings || (Array.isArray(resp) ? resp : []);
-      items = items.concat(batch);
-      cursor = resp.nextCursor || resp.cursor || null;
-      guard++;
-    } while(cursor && guard < 10);
-
-    if (!items.length) {
-      area.innerHTML = '<div class="msg info">No active listings found on the marketplace.</div>';
-      return;
-    }
-
-    const walletGoldById = {};
-
-    // Check if wallet balance was included in the listing payload directly
-    items.forEach(l => {
-      const id = extractId(l);
-      if (id) {
-        const g = extractWalletGld(l);
-        if (g !== null) walletGoldById[id] = g;
-      }
-    });
-
-    const ids = items.map(extractId).filter(Boolean);
-    const missingIds = [...new Set(ids.filter(id => walletGoldById[id] === undefined))];
-
-    let sampleBatchRaw = '(embedded in listing payload)';
-
-    // Query batch endpoint for traits if missing from listings
-    if (missingIds.length > 0) {
-      area.innerHTML = '<div class="msg info"><span class="spinner"></span>Pulling $GLD wallet balances for listed tokens…</div>';
-      for (let i = 0; i < missingIds.length; i += 100) {
-        const chunk = missingIds.slice(i, i + 100);
-        try {
-          const batch = await apiGet(proxy, '/v1/riggles/batch?ids=' + chunk.join(','), key);
-          if (i === 0) sampleBatchRaw = JSON.stringify(batch, null, 2);
-          ingestRigglesData(batch, walletGoldById);
-        } catch(e) {
-          try {
-            const alt = await apiGet(proxy, '/v1/riggles?ids=' + chunk.join(','), key);
-            if (i === 0) sampleBatchRaw = JSON.stringify(alt, null, 2);
-            ingestRigglesData(alt, walletGoldById);
-          } catch(e2) {}
-        }
-      }
-
-      // If still missing, page through full collection
-      const stillMissing = missingIds.filter(id => walletGoldById[id] === undefined);
-      if (stillMissing.length > 0) {
-        try {
-          let c = null, gGuard = 0;
-          do {
-            const allR = await apiGet(proxy, '/v1/riggles?limit=1000' + (c ? '&cursor=' + encodeURIComponent(c) : ''), key);
-            ingestRigglesData(allR, walletGoldById);
-            c = allR.nextCursor || allR.cursor || null;
-            gGuard++;
-            if (missingIds.every(id => walletGoldById[id] !== undefined)) break;
-          } while(c && gGuard < 10);
-        } catch(e3) {}
-      }
-    }
-
-    allFetchedRows = items.map(l => {
-      const id = extractId(l);
-      const rawGold = (id && walletGoldById[id] !== undefined) ? walletGoldById[id] : null;
-      return {
-        id,
-        goldRaw: typeof rawGold === 'number' ? rawGold : parseFloat(rawGold) || 0,
-        price: extractPrice(l),
-        link: fallbackLink(id)
-      };
-    });
-
-    $('filterBar').style.display = 'flex';
-    renderTable();
-
-    // Expandable payload inspector for debugging
-    const sampleListing = items[0] ? JSON.stringify(items[0], null, 2) : '(no items)';
-    const debugWrap = document.createElement('details');
-    debugWrap.style.marginTop = '16px';
-    debugWrap.innerHTML = '<summary style="cursor:pointer;color:var(--text-dim);font-size:12px;">Debug: Inspect API Payload</summary>' +
-      '<div class="msg info"><strong>Sample listing item:</strong><pre>' + sampleListing.replace(/</g,'&lt;') + '</pre></div>' +
-      '<div class="msg info"><strong>Sample riggle details:</strong><pre>' + sampleBatchRaw.replace(/</g,'&lt;') + '</pre></div>';
-    $('area').appendChild(debugWrap);
-
-  } catch(err) {
-    area.innerHTML = '<div class="msg error">' + err.message + (err.raw ? '<pre>' + err.raw + '</pre>' : '') + '</div>';
-  } finally {
-    $('loadBtn').disabled = false;
-  }
-});
 </script>
+
 </body>
 </html>
