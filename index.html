@@ -114,7 +114,34 @@ function findOpenSeaUrl(obj, depth=0){
   }
   return null;
 }
-function extractId(obj){ const v = findField(obj, ['tokenid','id']); return v !== undefined ? String(v) : null; }
+function extractId(obj, depth=0){
+  if(!obj || typeof obj !== 'object' || depth > 4) return null;
+  // Pass 1: prefer an explicit tokenId-style key, numeric and in the riggle range.
+  for(const [k,v] of Object.entries(obj)){
+    const lk = k.toLowerCase();
+    if(lk.includes('tokenid') || lk === 'riggleid' || lk === 'riggle_id'){
+      const n = parseInt(v, 10);
+      if(!isNaN(n) && n > 0 && n < 3000) return String(n);
+    }
+  }
+  // Pass 2: a plain "id" field, but only if it looks like a small riggle number,
+  // not a UUID or database id.
+  for(const [k,v] of Object.entries(obj)){
+    const lk = k.toLowerCase();
+    if(lk === 'id'){
+      const n = parseInt(v, 10);
+      if(!isNaN(n) && n > 0 && n < 3000 && String(v).trim() === String(n)) return String(n);
+    }
+  }
+  // Pass 3: recurse into nested objects (e.g. a nested "riggle" or "token" object).
+  for(const [k,v] of Object.entries(obj)){
+    if(v && typeof v === 'object' && !Array.isArray(v)){
+      const found = extractId(v, depth+1);
+      if(found) return found;
+    }
+  }
+  return null;
+}
 function fallbackLink(id){ return 'https://opensea.io/item/robinhood/0x49a4db49c460d5e06ee0b69c5ce0b9744522a3a8/' + id; }
 
 async function apiGet(base, path, key){
