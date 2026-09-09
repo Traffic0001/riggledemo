@@ -86,7 +86,23 @@ let savedProxy = null;
 try { savedProxy = localStorage.getItem('riggles_proxy_url'); } catch(e) {}
 if (savedProxy) $('proxyUrl').value = savedProxy;
 
-function isAmount(v){ return v && typeof v === 'object' && ('display' in v); }
+function isAmount(v){ return v && typeof v === 'object' && ('wei' in v) && (v.decimals !== undefined || v.display !== undefined); }
+function formatAmount(amt){
+  if(!amt) return null;
+  if(amt.display !== undefined) return String(amt.display) + (amt.currency ? ' ' + amt.currency : '');
+  try{
+    const wei = BigInt(amt.wei);
+    const decimals = amt.decimals ?? 18;
+    const divisor = BigInt(10) ** BigInt(decimals);
+    const whole = wei / divisor;
+    const frac = wei % divisor;
+    let fracStr = frac.toString().padStart(decimals, '0').slice(0, 4).replace(/0+$/, '');
+    const numStr = fracStr ? whole.toString() + '.' + fracStr : whole.toString();
+    return numStr + (amt.currency ? ' ' + amt.currency : '');
+  } catch(e){
+    return String(amt.wei);
+  }
+}
 function findAmount(obj, keyword, depth=0){
   if(!obj || typeof obj !== 'object' || depth > 4) return null;
   for(const [k,v] of Object.entries(obj)) if(isAmount(v) && k.toLowerCase().includes(keyword)) return v;
@@ -193,11 +209,13 @@ $('loadBtn').addEventListener('click', async () => {
 
     const ids = items.map(extractId).filter(Boolean);
     const goldById = {};
+    let sampleBatchRaw = '(no batch response yet)';
     for(let i=0;i<ids.length;i+=100){
       const chunk = ids.slice(i,i+100);
       try{
         const batch = await apiGet(proxy, '/v1/riggles/batch?ids=' + chunk.join(','), key);
         const batchItems = batch.items || batch.riggles || [];
+        if(i === 0) sampleBatchRaw = JSON.stringify(batchItems[0] || batch, null, 2);
         batchItems.forEach(r => { const rid = extractId(r); if(rid) goldById[rid] = findAmount(r,'gold'); });
       } catch(e) {}
     }
@@ -207,8 +225,8 @@ $('loadBtn').addEventListener('click', async () => {
       const priceAmt = findAmount(l, 'price');
       return {
         id,
-        gold: id && goldById[id] ? goldById[id].display : null,
-        price: priceAmt ? priceAmt.display : null,
+        gold: id && goldById[id] ? formatAmount(goldById[id]) : null,
+        price: priceAmt ? formatAmount(priceAmt) : null,
         link: fallbackLink(id)
       };
     }).sort((a,b) => (parseFloat(a.id) || 0) - (parseFloat(b.id) || 0));
@@ -224,10 +242,9 @@ $('loadBtn').addEventListener('click', async () => {
 
     // Debug: show the raw shape of one listing + one batch item so we can see real field names.
     const sampleListing = items[0] ? JSON.stringify(items[0], null, 2) : '(no items)';
-    const sampleGold = ids[0] && goldById[ids[0]] ? JSON.stringify(goldById[ids[0]], null, 2) : '(no gold match for id ' + ids[0] + ')';
     html += '<details style="margin-top:16px;"><summary style="cursor:pointer;color:var(--text-dim);font-size:12px;">Debug: raw API shape (tap to expand)</summary>' +
       '<div class="msg info"><strong>Sample listing item:</strong><pre>' + sampleListing.replace(/</g,'&lt;') + '</pre></div>' +
-      '<div class="msg info"><strong>Sample gold amount for id ' + (ids[0] ?? '?') + ':</strong><pre>' + sampleGold.replace(/</g,'&lt;') + '</pre></div>' +
+      '<div class="msg info"><strong>Sample raw batch item (id ' + (ids[0] ?? '?') + '):</strong><pre>' + sampleBatchRaw.replace(/</g,'&lt;') + '</pre></div>' +
       '</details>';
 
     area.innerHTML = html;
