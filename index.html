@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Riggles — listed, with $GLD & price</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0a; --panel:#141412; --line:#262420; --line-soft:#1c1a17;
+    --text:#ece7db; --text-dim:#8c8577; --gold:#d7ad4b; --gold-dim:#7a6530;
+    --blue:#6fb7c9; --red:#c9705f; --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(215,173,75,0.07), transparent 60%), var(--bg);
+    color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;line-height:1.5;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:var(--blue);} a:hover{color:#9ed4e3;}
+  .wrap{max-width:900px;margin:0 auto;padding:48px 24px 100px;}
+  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px;}
+  header h1{font-size:21px;margin:0 0 6px;} header h1 span{color:var(--gold);}
+  header .sub{color:var(--text-dim);font-size:13px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  input[type=password]{background:#0e0d0b;border:1px solid var(--line);color:var(--text);padding:10px 12px;
+    border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;flex:1;min-width:220px;}
+  input:focus{border-color:var(--gold-dim);}
+  button{background:var(--gold);color:#131009;border:none;padding:10px 16px;border-radius:var(--radius);
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;}
+  button:hover{background:#e6bc5c;} button:disabled{background:#3a3527;color:#7a745f;cursor:not-allowed;}
+  .key-status{font-size:12px;color:var(--text-dim);margin-top:10px;}
+  .key-status.ok{color:#8fbf7a;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-weight:500;color:var(--text-dim);font-size:11px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--line-soft);font-family:'JetBrains Mono',monospace;}
+  tbody tr:hover{background:#17150f;}
+  td.gold{color:var(--gold);} td.price{color:var(--blue);}
+  .table-wrap{overflow-x:auto;}
+  .count{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
+  .msg{font-size:13px;padding:12px 14px;border-radius:var(--radius);margin-top:6px;}
+  .msg.error{background:rgba(201,112,95,0.1);border:1px solid rgba(201,112,95,0.35);color:#e3a196;}
+  .msg.info{background:rgba(111,183,201,0.08);border:1px solid rgba(111,183,201,0.3);color:var(--blue);}
+  .msg pre{white-space:pre-wrap;font-size:12px;margin:8px 0 0;color:#d8a598;}
+  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);border-top-color:var(--gold);
+    display:inline-block;vertical-align:-2px;margin-right:6px;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  footer{margin-top:32px;font-size:12px;color:var(--text-dim);border-top:1px solid var(--line);padding-top:16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Riggles — listed, with <span>$GLD</span> &amp; price</h1>
+    <div class="sub">Every riggle currently listed on OpenSea, its unclaimed $GLD balance, and its listing price.</div>
+  </header>
+
+  <div class="panel">
+    <div class="row" style="margin-bottom:10px;">
+      <input type="text" id="proxyUrl" placeholder="Your worker URL, e.g. https://riggles-proxy.yoursubdomain.workers.dev" autocomplete="off" />
+    </div>
+    <div class="row">
+      <input type="password" id="apiKey" placeholder="Paste your Bearer API key…" autocomplete="off" />
+      <button id="loadBtn">Load listings</button>
+    </div>
+    <div class="key-status" id="status">Proxy URL is remembered on this device. The API key is not — you'll paste it fresh each visit.</div>
+  </div>
+
+  <div class="panel">
+    <div id="area"><div class="msg info">Paste your key above and click "Load listings."</div></div>
+  </div>
+
+  <footer>
+    Talks to api.riggles.xyz through your own Cloudflare Worker proxy (see setup instructions), since the API only
+    accepts direct browser requests from riggles.xyz itself. Your API key travels straight through the proxy to
+    Riggles and is never stored anywhere.
+  </footer>
+</div>
+
+<script>
+const API_DIRECT = 'https://api.riggles.xyz';
+const $ = id => document.getElementById(id);
+
+let savedProxy = null;
+try { savedProxy = localStorage.getItem('riggles_proxy_url'); } catch(e) {}
+if (savedProxy) $('proxyUrl').value = savedProxy;
+
+function isAmount(v){ return v && typeof v === 'object' && ('display' in v); }
+function findAmount(obj, keyword, depth=0){
+  if(!obj || typeof obj !== 'object' || depth > 4) return null;
+  for(const [k,v] of Object.entries(obj)) if(isAmount(v) && k.toLowerCase().includes(keyword)) return v;
+  for(const [k,v] of Object.entries(obj)) if(v && typeof v === 'object' && !Array.isArray(v)){
+    const f = findAmount(v, keyword, depth+1); if(f) return f;
+  }
+  return null;
+}
+function findField(obj, keywords, depth=0){
+  if(!obj || typeof obj !== 'object' || depth > 4) return undefined;
+  for(const [k,v] of Object.entries(obj)){
+    const lk = k.toLowerCase();
+    if(keywords.some(w => lk === w || lk.includes(w)) && (typeof v === 'string' || typeof v === 'number')) return v;
+  }
+  for(const [k,v] of Object.entries(obj)) if(v && typeof v === 'object' && !Array.isArray(v)){
+    const f = findField(v, keywords, depth+1); if(f !== undefined) return f;
+  }
+  return undefined;
+}
+function findOpenSeaUrl(obj, depth=0){
+  if(!obj || typeof obj !== 'object' || depth > 4) return null;
+  for(const [k,v] of Object.entries(obj)) if(typeof v === 'string' && /^https?:\/\//.test(v) && /opensea/i.test(v)) return v;
+  for(const [k,v] of Object.entries(obj)) if(v && typeof v === 'object' && !Array.isArray(v)){
+    const f = findOpenSeaUrl(v, depth+1); if(f) return f;
+  }
+  return null;
+}
+function extractId(obj){ const v = findField(obj, ['tokenid','id']); return v !== undefined ? String(v) : null; }
+function fallbackLink(id){ return 'https://opensea.io/collection/itsriggles?search[stringTraits][0][values][0]=' + id; }
+
+async function apiGet(base, path, key){
+  let res;
+  try{
+    res = await fetch(base + path, { headers: { 'Authorization': 'Bearer ' + key } });
+  } catch(networkErr){
+    const e = new Error(`The request never reached your proxy. Either the proxy URL above is wrong/empty, the worker isn't deployed yet, or this browser is offline. Open the console (F12) for the exact error.`);
+    e.raw = String(networkErr);
+    throw e;
+  }
+  let body = null;
+  try{ body = await res.json(); } catch(e){}
+  if(!res.ok){
+    const msg = (body && body.error && body.error.message) ? body.error.message
+      : res.status === 401 ? 'That key was rejected — check it was pasted in full, with no extra spaces.'
+      : res.status === 429 ? 'Rate limited by the API — wait a moment and try again.'
+      : res.status === 503 ? 'The index isn\'t ready right now — try again shortly.'
+      : 'Request failed with status ' + res.status + '.';
+    throw new Error(msg);
+  }
+  return body;
+}
+
+$('loadBtn').addEventListener('click', async () => {
+  const key = $('apiKey').value.trim();
+  const proxy = $('proxyUrl').value.trim().replace(/\/+$/, '');
+  const area = $('area');
+  if(!proxy){ area.innerHTML = '<div class="msg error">Paste your worker\'s URL above first — see the setup instructions for how to get one.</div>'; return; }
+  if(!key){ area.innerHTML = '<div class="msg error">Paste your API key first.</div>'; return; }
+  try { localStorage.setItem('riggles_proxy_url', proxy); } catch(e) {}
+  $('loadBtn').disabled = true;
+  area.innerHTML = '<div class="msg info"><span class="spinner"></span>Fetching listings…</div>';
+  try{
+    let items = [];
+    let cursor = null, guard = 0;
+    do{
+      const resp = await apiGet(proxy, '/v1/listings?limit=1000' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''), key);
+      items = items.concat(resp.items || []);
+      cursor = resp.nextCursor || null;
+      guard++;
+    } while(cursor && guard < 10);
+
+    if(!items.length){
+      area.innerHTML = '<div class="msg info">The API answered fine, but no riggles are listed right now.</div>';
+      return;
+    }
+
+    const ids = items.map(extractId).filter(Boolean);
+    const goldById = {};
+    for(let i=0;i<ids.length;i+=100){
+      const chunk = ids.slice(i,i+100);
+      try{
+        const batch = await apiGet(proxy, '/v1/riggles/batch?ids=' + chunk.join(','), key);
+        const batchItems = batch.items || batch.riggles || [];
+        batchItems.forEach(r => { const rid = extractId(r); if(rid) goldById[rid] = findAmount(r,'gold'); });
+      } catch(e) {}
+    }
+
+    const rows = items.map(l => {
+      const id = extractId(l);
+      const priceAmt = findAmount(l, 'price');
+      return {
+        id,
+        gold: id && goldById[id] ? goldById[id].display : null,
+        price: priceAmt ? priceAmt.display : null,
+        link: findOpenSeaUrl(l) || (id ? fallbackLink(id) : 'https://opensea.io/collection/itsriggles')
+      };
+    }).sort((a,b) => (parseFloat(a.id) || 0) - (parseFloat(b.id) || 0));
+
+    let html = '<div class="count">' + rows.length + ' listed riggle' + (rows.length===1?'':'s') + '</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Riggle</th><th>Unclaimed $GLD</th><th>Price</th><th></th></tr></thead><tbody>';
+    for(const r of rows){
+      html += '<tr><td>#' + (r.id ?? '—') + '</td><td class="gold">' + (r.gold ?? '—') +
+        '</td><td class="price">' + (r.price ?? '—') +
+        '</td><td><a href="' + r.link + '" target="_blank" rel="noopener">view ↗</a></td></tr>';
+    }
+    html += '</tbody></table></div>';
+    area.innerHTML = html;
+  } catch(err){
+    area.innerHTML = '<div class="msg error">' + err.message + (err.raw ? '<pre>' + err.raw + '</pre>' : '') + '</div>';
+  } finally {
+    $('loadBtn').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
